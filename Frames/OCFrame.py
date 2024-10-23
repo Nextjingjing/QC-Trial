@@ -11,21 +11,60 @@ class OCFrame(tk.Frame):
         super().__init__(parent)
         self.input_frame = input_frame  # Receive InputFrame to access n, p, c
 
-        # Button to calculate and display the OC Curve
-        self.button_show_oc = ttk.Button(self, text="Show OC Curve", command=self.show_oc_curve)
-        self.button_show_oc.pack(padx=10, pady=10)
+        # Initialize plot variables
+        self.fig, self.ax = plt.subplots(figsize=(8, 6))
+        self.canvas = None
 
-        # Frame to hold the plot
+        # Initialize current limits
+        self.initial_xlim = (0, 1)
+        self.initial_ylim = (0, 1)  # Assuming Pa ranges from 0 to 1
+        self.current_xlim = self.initial_xlim
+        self.current_ylim = self.initial_ylim
+
+        # Configure grid layout for OCFrame
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        # Create Control Frame (Buttons)
+        self.control_frame = ttk.Frame(self)
+        self.control_frame.grid(row=0, column=0, padx=10, pady=10, sticky='nw')
+
+        # Create Plot Frame
         self.plot_frame = ttk.Frame(self)
-        self.plot_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.plot_frame.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
+
+        # Add Buttons to Control Frame
+        self.button_show_oc = ttk.Button(self.control_frame, text="Show OC Curve", command=self.show_oc_curve)
+        self.button_show_oc.pack(pady=5, fill='x')
+
+        self.button_zoom_in_x = ttk.Button(self.control_frame, text="Zoom In X", command=self.zoom_in_x)
+        self.button_zoom_in_x.pack(pady=5, fill='x')
+
+        self.button_zoom_out_x = ttk.Button(self.control_frame, text="Zoom Out X", command=self.zoom_out_x)
+        self.button_zoom_out_x.pack(pady=5, fill='x')
+
+        self.button_shift_left = ttk.Button(self.control_frame, text="Shift Left", command=self.shift_left)
+        self.button_shift_left.pack(pady=5, fill='x')
+
+        self.button_shift_right = ttk.Button(self.control_frame, text="Shift Right", command=self.shift_right)
+        self.button_shift_right.pack(pady=5, fill='x')
+
+        self.button_reset_zoom = ttk.Button(self.control_frame, text="Reset Zoom", command=self.reset_zoom)
+        self.button_reset_zoom.pack(pady=5, fill='x')
 
     def calculate_pa(self, n, p, c):
+        """
+        Calculate the Probability of Acceptance (Pa) using the binomial distribution.
+        """
         pa = 0
         for k in range(0, c + 1):
             pa += comb(n, k) * (p ** k) * ((1 - p) ** (n - k))
         return pa
 
     def show_oc_curve(self):
+        """
+        Generate and display the OC Curve based on input values.
+        """
         try:
             n = self.input_frame.n
             c = self.input_frame.c
@@ -38,26 +77,141 @@ class OCFrame(tk.Frame):
             pa_values = [self.calculate_pa(n, p, c) for p in p_values]
 
             # Clear previous plots
-            for widget in self.plot_frame.winfo_children():
-                widget.destroy()
+            self.ax.clear()
 
-            # Create Figure and Plot with enhanced scaling
-            fig, ax = plt.subplots(figsize=(8, 6))
-            ax.plot(p_values, pa_values, label='OC Curve', color='blue')
-            ax.set_title('Operating Characteristic (OC) Curve', fontsize=14)
-            ax.set_xlabel('p: Fraction Defective', fontsize=12)
-            ax.set_ylabel('Pa: Probability of Acceptance', fontsize=12)
-            ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-            ax.legend(fontsize=12)
-            ax.tick_params(axis='both', which='major', labelsize=10)
+            # Plot the OC Curve
+            self.ax.plot(p_values, pa_values, label='OC Curve', color='blue')
+            self.ax.set_title('Operating Characteristic (OC) Curve', fontsize=14)
+            self.ax.set_xlabel('p: Fraction Defective', fontsize=12)
+            self.ax.set_ylabel('Pa: Probability of Acceptance', fontsize=12)
+            self.ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+            self.ax.legend(fontsize=12)
+            self.ax.tick_params(axis='both', which='major', labelsize=10)
+
+            # Set initial limits
+            self.current_xlim = self.initial_xlim
+            self.current_ylim = self.initial_ylim
+            self.ax.set_xlim(self.current_xlim)
+            self.ax.set_ylim(self.current_ylim)
 
             # Improve layout
-            fig.tight_layout()
+            self.fig.tight_layout()
 
             # Embed the plot in Tkinter
-            canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
-            canvas.draw()
-            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            if self.canvas:
+                self.canvas.get_tk_widget().destroy()
+            self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
+            self.canvas.draw()
+            self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def zoom_in_x(self):
+        """
+        Zoom in on the X-axis by decreasing the current limits by 0.05.
+        """
+        try:
+            # Calculate new x-axis limits for zooming in by 0.05
+            x_min, x_max = self.current_xlim
+            zoom_step = 0.05
+
+            # Calculate the amount to reduce from each side
+            new_x_min = x_min + zoom_step / 2
+            new_x_max = x_max - zoom_step / 2
+
+            # Ensure limits do not exceed [0,1]
+            new_x_min = max(0, new_x_min)
+            new_x_max = min(1, new_x_max)
+
+            # Update current limits
+            self.current_xlim = (new_x_min, new_x_max)
+            self.ax.set_xlim(self.current_xlim)
+            self.canvas.draw()
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def zoom_out_x(self):
+        """
+        Zoom out on the X-axis by increasing the current limits by 0.05.
+        """
+        try:
+            # Calculate new x-axis limits for zooming out by 0.05
+            x_min, x_max = self.current_xlim
+            zoom_step = 0.05
+
+            # Calculate the amount to add to each side
+            new_x_min = x_min - zoom_step / 2
+            new_x_max = x_max + zoom_step / 2
+
+            # Ensure limits stay within [0,1]
+            new_x_min = max(0, new_x_min)
+            new_x_max = min(1, new_x_max)
+
+            # Update current limits
+            self.current_xlim = (new_x_min, new_x_max)
+            self.ax.set_xlim(self.current_xlim)
+            self.canvas.draw()
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def shift_left(self):
+        """
+        Shift the X-axis interval to the left by 0.05.
+        """
+        try:
+            x_min, x_max = self.current_xlim
+            shift_step = 0.05
+
+            new_x_min = x_min - shift_step
+            new_x_max = x_max - shift_step
+
+            # Ensure limits do not go below 0
+            if new_x_min < 0:
+                new_x_min = 0
+                new_x_max = new_x_min + (x_max - x_min)
+
+            self.current_xlim = (new_x_min, new_x_max)
+            self.ax.set_xlim(self.current_xlim)
+            self.canvas.draw()
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def shift_right(self):
+        """
+        Shift the X-axis interval to the right by 0.05.
+        """
+        try:
+            x_min, x_max = self.current_xlim
+            shift_step = 0.05
+
+            new_x_min = x_min + shift_step
+            new_x_max = x_max + shift_step
+
+            # Ensure limits do not exceed 1
+            if new_x_max > 1:
+                new_x_max = 1
+                new_x_min = new_x_max - (x_max - x_min)
+
+            self.current_xlim = (new_x_min, new_x_max)
+            self.ax.set_xlim(self.current_xlim)
+            self.canvas.draw()
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def reset_zoom(self):
+        """
+        Reset the X and Y axis limits to their initial values.
+        """
+        try:
+            self.current_xlim = self.initial_xlim
+            self.current_ylim = self.initial_ylim
+            self.ax.set_xlim(self.current_xlim)
+            self.ax.set_ylim(self.current_ylim)
+            self.canvas.draw()
         except Exception as e:
             messagebox.showerror("Error", str(e))
