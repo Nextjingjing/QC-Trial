@@ -1,3 +1,5 @@
+# Frames/InputFrame.py
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -43,4 +45,4 @@ class InputFrame(tk.Frame):
             print(f"n: {self.n}, p: {self.p}, c: {self.c}")
             # คุณสามารถเพิ่มโค้ดเพิ่มเติมที่ต้องการหลังจากรับค่าได้ที่นี่
         except ValueError:
-            print("กรุณากรอกข้อมูลที่ถูกต้องสำหรับ n, p, และ c")
+            tk.messagebox.showerror("Input Error", "กรุณากรอกข้อมูลที่ถูกต้องสำหรับ n, p, และ c")
