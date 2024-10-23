@@ -41,7 +41,7 @@ def main():
     oc_frame.grid(row=0, column=0, sticky='nsew')
 
     # Set a minimum size for the window
-    root.geometry("1000x600")
+    root.geometry("1200x700")
 
     root.mainloop()
 

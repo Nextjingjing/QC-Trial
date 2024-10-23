@@ -1,19 +1,29 @@
 # Frames/OCFrame.py
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from math import comb
 
 class OCFrame(tk.Frame):
     def __init__(self, parent, input_frame):
-        super().__init__(parent)
-        self.input_frame = input_frame  # Receive InputFrame to access n, p, c
+        super().__init__(parent, bg='#81FFE7')  # สีพื้นหลังสีเหลืองอ่อน
+        self.input_frame = input_frame  # รับ InputFrame เพื่อเข้าถึง n, p, c
+
+        # Initialize Style
+        self.style = ttk.Style()
+        self.style.configure('TLabel', font=('Helvetica', 12), background='#81FFE7')
+        self.style.configure('TButton', font=('Helvetica', 12, 'bold'))
+        self.style.configure('Control.TButton', font=('Helvetica', 12))
+        self.style.configure('PaLabel.TLabel', font=('Helvetica', 14, 'bold'), foreground='blue', background='#81FFE7')
+        self.style.configure('CurrentVal.TLabel', font=('Helvetica', 12), foreground='black', background='#81FFE7')
 
         # Initialize plot variables
-        self.fig, self.ax = plt.subplots(figsize=(8, 6))
-        self.canvas = None
+        self.fig, self.ax = plt.subplots(figsize=(6, 4))
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
         # Initialize current limits
         self.initial_xlim = (0, 1)
@@ -22,35 +32,35 @@ class OCFrame(tk.Frame):
         self.current_ylim = self.initial_ylim
 
         # Configure grid layout for OCFrame
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure(0, weight=0)  # Control Buttons Column
+        self.columnconfigure(1, weight=1)  # Plot Column
         self.rowconfigure(0, weight=1)
 
         # Create Control Frame (Buttons)
-        self.control_frame = ttk.Frame(self)
+        self.control_frame = ttk.Frame(self, style='TLabel')
         self.control_frame.grid(row=0, column=0, padx=10, pady=10, sticky='nw')
 
-        # Create Plot Frame
-        self.plot_frame = ttk.Frame(self)
-        self.plot_frame.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
-
         # Add Buttons to Control Frame
-        self.button_show_oc = ttk.Button(self.control_frame, text="Show OC Curve", command=self.show_oc_curve)
+        self.button_show_oc = ttk.Button(self.control_frame, text="Show OC Curve", command=self.show_oc_curve, style='Control.TButton')
         self.button_show_oc.pack(pady=5, fill='x')
 
-        self.button_zoom_in_x = ttk.Button(self.control_frame, text="Zoom In X", command=self.zoom_in_x)
+        self.button_zoom_in_x = ttk.Button(self.control_frame, text="Zoom In X", command=self.zoom_in_x, style='Control.TButton')
         self.button_zoom_in_x.pack(pady=5, fill='x')
 
-        self.button_zoom_out_x = ttk.Button(self.control_frame, text="Zoom Out X", command=self.zoom_out_x)
+        self.button_zoom_out_x = ttk.Button(self.control_frame, text="Zoom Out X", command=self.zoom_out_x, style='Control.TButton')
         self.button_zoom_out_x.pack(pady=5, fill='x')
 
-        self.button_shift_left = ttk.Button(self.control_frame, text="Shift Left", command=self.shift_left)
+        self.button_shift_left = ttk.Button(self.control_frame, text="Shift Left", command=self.shift_left, style='Control.TButton')
         self.button_shift_left.pack(pady=5, fill='x')
 
-        self.button_shift_right = ttk.Button(self.control_frame, text="Shift Right", command=self.shift_right)
+        self.button_shift_right = ttk.Button(self.control_frame, text="Shift Right", command=self.shift_right, style='Control.TButton')
         self.button_shift_right.pack(pady=5, fill='x')
 
-        self.button_reset_zoom = ttk.Button(self.control_frame, text="Reset Zoom", command=self.reset_zoom)
+        self.button_reset_zoom = ttk.Button(self.control_frame, text="Reset Zoom", command=self.reset_zoom, style='Control.TButton')
         self.button_reset_zoom.pack(pady=5, fill='x')
+
+        self.button_save_plot = ttk.Button(self.control_frame, text="Save OC Curve", command=self.save_oc_curve, style='Control.TButton')
+        self.button_save_plot.pack(pady=5, fill='x')
 
     def calculate_pa(self, n, p, c):
         """
@@ -70,7 +80,7 @@ class OCFrame(tk.Frame):
             c = self.input_frame.c
 
             if n is None or c is None:
-                raise ValueError("Please enter the required data in the InputFrame before displaying the OC Curve.")
+                raise ValueError("กรุณากรอกข้อมูลใน InputFrame ก่อนแสดงกราฟ OC")
 
             # Create a range of p values from 0 to 1 with higher resolution
             p_values = [i / 10000 for i in range(0, 10001)]
@@ -98,11 +108,7 @@ class OCFrame(tk.Frame):
             self.fig.tight_layout()
 
             # Embed the plot in Tkinter
-            if self.canvas:
-                self.canvas.get_tk_widget().destroy()
-            self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
             self.canvas.draw()
-            self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
@@ -213,5 +219,24 @@ class OCFrame(tk.Frame):
             self.ax.set_xlim(self.current_xlim)
             self.ax.set_ylim(self.current_ylim)
             self.canvas.draw()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def save_oc_curve(self):
+        """
+        Save the current OC Curve plot as a PNG image.
+        """
+        try:
+            if not self.canvas:
+                raise ValueError("ไม่มีกราฟ OC Curve ที่จะแสดง กรุณาสร้างกราฟก่อน")
+            
+            # Ask user where to save the file
+            file_path = filedialog.asksaveasfilename(defaultextension=".png",
+                                                     filetypes=[("PNG files", "*.png"),
+                                                                ("All files", "*.*")],
+                                                     title="Save OC Curve")
+            if file_path:
+                self.fig.savefig(file_path)
+                messagebox.showinfo("Success", f"OC Curve ถูกบันทึกเรียบร้อยแล้วที่:\n{file_path}")
         except Exception as e:
             messagebox.showerror("Error", str(e))
