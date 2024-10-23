@@ -1,7 +1,7 @@
 # Frames/OCFrame.py
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from math import comb
@@ -9,15 +9,15 @@ from math import comb
 class OCFrame(tk.Frame):
     def __init__(self, parent, input_frame):
         super().__init__(parent)
-        self.input_frame = input_frame  # รับ InputFrame เพื่อเข้าถึง n, p, c
+        self.input_frame = input_frame  # Receive InputFrame to access n, p, c
 
-        # ปุ่มสำหรับคำนวณและแสดงกราฟ OC
+        # Button to calculate and display the OC Curve
         self.button_show_oc = ttk.Button(self, text="Show OC Curve", command=self.show_oc_curve)
-        self.button_show_oc.grid(row=0, column=0, padx=10, pady=10)
+        self.button_show_oc.pack(padx=10, pady=10)
 
-        # กรอบสำหรับแสดงกราฟ
+        # Frame to hold the plot
         self.plot_frame = ttk.Frame(self)
-        self.plot_frame.grid(row=1, column=0, padx=10, pady=10)
+        self.plot_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     def calculate_pa(self, n, p, c):
         pa = 0
@@ -31,29 +31,33 @@ class OCFrame(tk.Frame):
             c = self.input_frame.c
 
             if n is None or c is None:
-                raise ValueError("กรุณากรอกข้อมูลใน InputFrame ก่อนแสดงกราฟ OC")
+                raise ValueError("Please enter the required data in the InputFrame before displaying the OC Curve.")
 
-            # สร้างช่วงของ p จาก 0 ถึง 1
-            p_values = [i / 1000 for i in range(0, 1001)]
+            # Create a range of p values from 0 to 1 with higher resolution
+            p_values = [i / 10000 for i in range(0, 10001)]
             pa_values = [self.calculate_pa(n, p, c) for p in p_values]
 
-            # ล้างกราฟก่อนหน้า
+            # Clear previous plots
             for widget in self.plot_frame.winfo_children():
                 widget.destroy()
 
-            # สร้าง Figure และ Plot
-            fig, ax = plt.subplots(figsize=(6, 4))
-            ax.plot(p_values, pa_values, label='OC Curve')
-            ax.set_title('Operating Characteristic (OC) Curve')
-            ax.set_xlabel('p: Fraction Defective')
-            ax.set_ylabel('Pa: Probability of Acceptance')
-            ax.grid(True)
-            ax.legend()
+            # Create Figure and Plot with enhanced scaling
+            fig, ax = plt.subplots(figsize=(8, 6))
+            ax.plot(p_values, pa_values, label='OC Curve', color='blue')
+            ax.set_title('Operating Characteristic (OC) Curve', fontsize=14)
+            ax.set_xlabel('p: Fraction Defective', fontsize=12)
+            ax.set_ylabel('Pa: Probability of Acceptance', fontsize=12)
+            ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+            ax.legend(fontsize=12)
+            ax.tick_params(axis='both', which='major', labelsize=10)
 
-            # แปลงกราฟเป็น Tkinter Widget
+            # Improve layout
+            fig.tight_layout()
+
+            # Embed the plot in Tkinter
             canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
             canvas.draw()
-            canvas.get_tk_widget().pack()
+            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
         except Exception as e:
-            tk.messagebox.showerror("Error", str(e))
+            messagebox.showerror("Error", str(e))
