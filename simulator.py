@@ -40,8 +40,8 @@ def update_plot(p, c):
     # Clear and update plot
     ax.clear()
     ax.plot(n_values, theoretical_pa_values, label='Theoretical Pa', linestyle='-')
-    ax.plot(n_values, simulated_pa_values_10, label='Simulated Pa (10 trials)', linestyle=':')
-    ax.plot(n_values, simulated_pa_values_500, label='Simulated Pa (500 trials)', linestyle='--')
+    ax.plot(n_values, simulated_pa_values_10, label='Simulated Pa (10 lots)', linestyle=':')
+    ax.plot(n_values, simulated_pa_values_500, label='Simulated Pa (500 lots)', linestyle='--')
     ax.set_xlabel('Sample Size (n)')
     ax.set_ylabel('Probability of Acceptance (Pa)')
     ax.set_title('Comparison of Theoretical and Simulated Pa Values with Different Trial Counts')
