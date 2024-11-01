@@ -1,23 +1,16 @@
-# Frames/PaCalculator.py
-
 import tkinter as tk
 from tkinter import ttk
 from math import comb  # ใช้สำหรับคำนวณทวีนิยมแบบ binomial
 
 class PaCalculator(tk.Frame):
     def __init__(self, parent, input_frame):
-        super().__init__(parent, bg='#FFF9C4')  # สีพื้นหลังสีเหลืองอ่อน
+        super().__init__(parent)  # ลบสีพื้นหลังออก
         self.input_frame = input_frame  # รับ InputFrame เพื่อเข้าถึง n, p, c
 
-        # Initialize Style
-        self.style = ttk.Style()
-        self.style.configure('TLabel', font=('Helvetica', 12), background='#FFF9C4')
-        self.style.configure('TButton', font=('Helvetica', 12, 'bold'))
-        self.style.configure('PaLabel.TLabel', font=('Helvetica', 14, 'bold'), foreground='blue', background='#FFF9C4')
-        self.style.configure('CurrentVal.TLabel', font=('Helvetica', 12), foreground='black', background='#FFF9C4')
+        # ลบการกำหนด Style ทั้งหมด
 
         # Create a LabelFrame to group calculator widgets
-        self.calc_group = tk.LabelFrame(self, text="Pa Calculator", font=('Helvetica', 12, 'bold'), bg='#FFF9C4', padx=20, pady=20)
+        self.calc_group = tk.LabelFrame(self, text="Pa Calculator", font=('Helvetica', 12, 'bold'), padx=20, pady=20)
         self.calc_group.grid(row=0, column=0, padx=20, pady=20, sticky='nsew')
 
         # Configure grid within LabelFrame
@@ -30,17 +23,17 @@ class PaCalculator(tk.Frame):
         self.button_calculate.grid(row=0, column=0, padx=10, pady=10, sticky='w')
 
         # Create and place Pa Result Label
-        self.label_pa = ttk.Label(self.calc_group, text="Pa: ", style='PaLabel.TLabel')
+        self.label_pa = ttk.Label(self.calc_group, text="Pa: ")
         self.label_pa.grid(row=0, column=1, padx=10, pady=10, sticky='w')
 
         # Create Frame for displaying current values of n, p, c
-        self.current_values_frame = ttk.Frame(self.calc_group, style='CurrentVal.TLabel')
+        self.current_values_frame = ttk.Frame(self.calc_group)
         self.current_values_frame.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky='w')
 
         # Labels to display current values (ซ่อนเริ่มต้น)
-        self.label_current_n = ttk.Label(self.current_values_frame, text="", style='CurrentVal.TLabel')
-        self.label_current_p = ttk.Label(self.current_values_frame, text="", style='CurrentVal.TLabel')
-        self.label_current_c = ttk.Label(self.current_values_frame, text="", style='CurrentVal.TLabel')
+        self.label_current_n = ttk.Label(self.current_values_frame, text="")
+        self.label_current_p = ttk.Label(self.current_values_frame, text="")
+        self.label_current_c = ttk.Label(self.current_values_frame, text="")
 
         self.label_current_n.grid(row=0, column=0, padx=5, pady=2, sticky='w')
         self.label_current_p.grid(row=0, column=1, padx=5, pady=2, sticky='w')

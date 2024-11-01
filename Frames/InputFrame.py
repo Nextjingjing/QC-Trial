@@ -1,29 +1,21 @@
-# Frames/InputFrame.py
-
 import tkinter as tk
 from tkinter import ttk, messagebox
 
 class InputFrame(tk.Frame):
     def __init__(self, parent):
-        super().__init__(parent, bg='#FFF9C4')  # สีพื้นหลังสีเหลืองอ่อน
+        super().__init__(parent)  # ลบสีพื้นหลังออก
 
-        # Initialize Style
-        self.style = ttk.Style()
-        self.style.configure('TLabel', font=('Helvetica', 12), background='#FFF9C4')
-        self.style.configure('TEntry', font=('Helvetica', 12))
-        self.style.configure('TButton', font=('Helvetica', 12, 'bold'))
-        self.style.configure('Status.TLabel', font=('Helvetica', 10), foreground='red', background='#FFF9C4')
-        self.style.configure('Success.TLabel', font=('Helvetica', 10), foreground='green', background='#FFF9C4')
+        # ลบการกำหนด Style ทั้งหมด
 
         # Create a LabelFrame to group input fields
-        self.input_group = tk.LabelFrame(self, text="Input Parameters", font=('Helvetica', 12, 'bold'), bg='#FFF9C4', padx=20, pady=10)
+        self.input_group = tk.LabelFrame(self, text="Input Parameters", font=('Helvetica', 12, 'bold'), padx=20, pady=10)
         self.input_group.grid(row=0, column=0, padx=20, pady=20, sticky='nsew')
 
         # Configure grid within LabelFrame
         self.input_group.columnconfigure(1, weight=1)
 
         # Create and place Label and Entry for n
-        self.label_n = ttk.Label(self.input_group, text="n: Sample Size", background='#FFF9C4')
+        self.label_n = ttk.Label(self.input_group, text="n: Sample Size")
         self.label_n.grid(row=0, column=0, padx=10, pady=10, sticky='e')
 
         self.entry_n = ttk.Entry(self.input_group, width=25)
@@ -31,7 +23,7 @@ class InputFrame(tk.Frame):
         # self.entry_n.insert(0, "Enter an integer (e.g., 100)")  # ลบคำใบ้ออก
 
         # Create and place Label and Entry for p
-        self.label_p = ttk.Label(self.input_group, text="p: Probability of Defect", background='#FFF9C4')
+        self.label_p = ttk.Label(self.input_group, text="p: Probability of Defect")
         self.label_p.grid(row=1, column=0, padx=10, pady=10, sticky='e')
 
         self.entry_p = ttk.Entry(self.input_group, width=25)
@@ -39,7 +31,7 @@ class InputFrame(tk.Frame):
         # self.entry_p.insert(0, "Enter a float between 0 and 1 (e.g., 0.05)")  # ลบคำใบ้ออก
 
         # Create and place Label and Entry for c
-        self.label_c = ttk.Label(self.input_group, text="c: Acceptance Number", background='#FFF9C4')
+        self.label_c = ttk.Label(self.input_group, text="c: Acceptance Number")
         self.label_c.grid(row=2, column=0, padx=10, pady=10, sticky='e')
 
         self.entry_c = ttk.Entry(self.input_group, width=25)
@@ -51,19 +43,19 @@ class InputFrame(tk.Frame):
         self.button_submit.grid(row=3, column=0, columnspan=2, pady=20)
 
         # Create Status Frame for displaying messages
-        self.status_frame = ttk.Frame(self, style='Status.TLabel')
+        self.status_frame = ttk.Frame(self)
         self.status_frame.grid(row=1, column=0, padx=20, pady=(0, 20), sticky='ew')
 
-        self.status_label = ttk.Label(self.status_frame, text="", style='Status.TLabel')
+        self.status_label = ttk.Label(self.status_frame, text="")
         self.status_label.pack(anchor='w')
 
         # Create Labels to display current values of n, p, c (ซ่อนเริ่มต้น)
         self.current_values_frame = ttk.Frame(self)
         self.current_values_frame.grid(row=2, column=0, padx=20, pady=(0, 20), sticky='ew')
 
-        self.label_current_n = ttk.Label(self.current_values_frame, text="", style='TLabel')
-        self.label_current_p = ttk.Label(self.current_values_frame, text="", style='TLabel')
-        self.label_current_c = ttk.Label(self.current_values_frame, text="", style='TLabel')
+        self.label_current_n = ttk.Label(self.current_values_frame, text="")
+        self.label_current_p = ttk.Label(self.current_values_frame, text="")
+        self.label_current_c = ttk.Label(self.current_values_frame, text="")
 
         # ซ่อน labels ตอนเริ่มต้น
         self.label_current_n.grid(row=0, column=0, padx=10, pady=5, sticky='w')

@@ -1,5 +1,3 @@
-# Frames/OCFrame.py
-
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -8,16 +6,10 @@ from math import comb
 
 class OCFrame(tk.Frame):
     def __init__(self, parent, input_frame):
-        super().__init__(parent, bg='#81FFE7')  # สีพื้นหลังสีเหลืองอ่อน
+        super().__init__(parent)  # ลบสีพื้นหลังออก
         self.input_frame = input_frame  # รับ InputFrame เพื่อเข้าถึง n, p, c
 
-        # Initialize Style
-        self.style = ttk.Style()
-        self.style.configure('TLabel', font=('Helvetica', 12), background='#81FFE7')
-        self.style.configure('TButton', font=('Helvetica', 12, 'bold'))
-        self.style.configure('Control.TButton', font=('Helvetica', 12))
-        self.style.configure('PaLabel.TLabel', font=('Helvetica', 14, 'bold'), foreground='blue', background='#81FFE7')
-        self.style.configure('CurrentVal.TLabel', font=('Helvetica', 12), foreground='black', background='#81FFE7')
+        # ลบการกำหนด Style ทั้งหมด
 
         # Initialize plot variables
         self.fig, self.ax = plt.subplots(figsize=(6, 4))
@@ -37,29 +29,29 @@ class OCFrame(tk.Frame):
         self.rowconfigure(0, weight=1)
 
         # Create Control Frame (Buttons)
-        self.control_frame = ttk.Frame(self, style='TLabel')
+        self.control_frame = ttk.Frame(self)
         self.control_frame.grid(row=0, column=0, padx=10, pady=10, sticky='nw')
 
         # Add Buttons to Control Frame
-        self.button_show_oc = ttk.Button(self.control_frame, text="Show OC Curve", command=self.show_oc_curve, style='Control.TButton')
+        self.button_show_oc = ttk.Button(self.control_frame, text="Show OC Curve", command=self.show_oc_curve)
         self.button_show_oc.pack(pady=5, fill='x')
 
-        self.button_zoom_in_x = ttk.Button(self.control_frame, text="Zoom In X", command=self.zoom_in_x, style='Control.TButton')
+        self.button_zoom_in_x = ttk.Button(self.control_frame, text="Zoom In X", command=self.zoom_in_x)
         self.button_zoom_in_x.pack(pady=5, fill='x')
 
-        self.button_zoom_out_x = ttk.Button(self.control_frame, text="Zoom Out X", command=self.zoom_out_x, style='Control.TButton')
+        self.button_zoom_out_x = ttk.Button(self.control_frame, text="Zoom Out X", command=self.zoom_out_x)
         self.button_zoom_out_x.pack(pady=5, fill='x')
 
-        self.button_shift_left = ttk.Button(self.control_frame, text="Shift Left", command=self.shift_left, style='Control.TButton')
+        self.button_shift_left = ttk.Button(self.control_frame, text="Shift Left", command=self.shift_left)
         self.button_shift_left.pack(pady=5, fill='x')
 
-        self.button_shift_right = ttk.Button(self.control_frame, text="Shift Right", command=self.shift_right, style='Control.TButton')
+        self.button_shift_right = ttk.Button(self.control_frame, text="Shift Right", command=self.shift_right)
         self.button_shift_right.pack(pady=5, fill='x')
 
-        self.button_reset_zoom = ttk.Button(self.control_frame, text="Reset Zoom", command=self.reset_zoom, style='Control.TButton')
+        self.button_reset_zoom = ttk.Button(self.control_frame, text="Reset Zoom", command=self.reset_zoom)
         self.button_reset_zoom.pack(pady=5, fill='x')
 
-        self.button_save_plot = ttk.Button(self.control_frame, text="Save OC Curve", command=self.save_oc_curve, style='Control.TButton')
+        self.button_save_plot = ttk.Button(self.control_frame, text="Save OC Curve", command=self.save_oc_curve)
         self.button_save_plot.pack(pady=5, fill='x')
 
     def calculate_pa(self, n, p, c):
@@ -229,7 +221,7 @@ class OCFrame(tk.Frame):
         try:
             if not self.canvas:
                 raise ValueError("ไม่มีกราฟ OC Curve ที่จะแสดง กรุณาสร้างกราฟก่อน")
-            
+
             # Ask user where to save the file
             file_path = filedialog.asksaveasfilename(defaultextension=".png",
                                                      filetypes=[("PNG files", "*.png"),
